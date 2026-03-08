@@ -200,3 +200,15 @@ if st.button("Compare All Models"):
         st.plotly_chart(fig, use_container_width=True)
   except Exception as e:
     st.error(f"⚠️ Comparison failed: {str(e)}. Please ensure models are trained first.")
+
+st.divider()
+st.info("✅ **Next Step:** Go to **🧠 Explainability** in the sidebar to understand WHY the model makes its decisions.")
+
+# Sidebar status
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### 📋 Progress")
+    st.markdown("✅ Upload & Train")
+    st.markdown("✅ Bias Audit" if 'current_audit' in st.session_state else "🔄 Bias Audit")
+    st.markdown("⬜ Explainability")
+    st.markdown("⬜ Report")
