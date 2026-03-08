@@ -13,6 +13,8 @@ import os
 
 router = APIRouter()
 
+ALLOWED_MODELS = {'logistic_regression', 'random_forest', 'xgboost'}
+
 
 def _execute_audit(model, model_name: str, trainer: ModelTrainer) -> Dict[str, Any]:
     """Shared core logic to execute an audit given a loaded model and prepared trainer."""
@@ -29,6 +31,8 @@ def _execute_audit(model, model_name: str, trainer: ModelTrainer) -> Dict[str, A
 
 def _run_audit(model_name: str, include_sensitive: bool = True) -> Dict[str, Any]:
     """Helper to load a model and run a single model audit."""
+    if model_name not in ALLOWED_MODELS:
+        raise HTTPException(status_code=404, detail=f"Unknown model '{model_name}'. Allowed: {', '.join(sorted(ALLOWED_MODELS))}")
     trainer = ModelTrainer()
     trainer.load_and_prepare_data(include_sensitive=include_sensitive)
     
