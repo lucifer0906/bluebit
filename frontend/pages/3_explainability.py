@@ -10,8 +10,8 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
-from core.model_trainer import ModelTrainer
 from core.explainability import ExplainabilityEngine
+from frontend.cache import get_cached_trainer, get_cached_model
 
 st.set_page_config(page_title="Explainability | AEGIS AI", page_icon="🧠", layout="wide")
 
@@ -25,15 +25,8 @@ model_name = st.selectbox("Select Model", ["logistic_regression", "random_forest
 if st.button("🔬 Analyze Model Decisions", type="primary"):
   try:
     with st.spinner("Computing SHAP values — this may take a moment..."):
-        trainer = ModelTrainer()
-        trainer.load_and_prepare_data(include_sensitive=True)
-        
-        # Try loading from disk first
-        try:
-            model = trainer.load_model(model_name)
-        except Exception:
-            trainer.train_all()
-            model = trainer.models[model_name]
+        trainer = get_cached_trainer(include_sensitive=True)
+        model = get_cached_model(model_name, include_sensitive=True)
         
         engine = ExplainabilityEngine(model, trainer.X_train, trainer.feature_names)
         engine.initialize_shap(trainer.X_test[:100])

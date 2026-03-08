@@ -10,8 +10,8 @@ import plotly.express as px
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
-from core.model_trainer import ModelTrainer
 from core.bias_detector import BiasDetector
+from frontend.cache import get_cached_trainer, get_cached_model
 
 st.set_page_config(page_title="Bias Audit | AEGIS AI", page_icon="🔍", layout="wide")
 
@@ -32,16 +32,8 @@ include_sensitive = st.checkbox("Model includes sensitive features", value=True)
 if st.button("🔍 Run Audit", type="primary"):
   try:
     with st.spinner("Running comprehensive bias audit..."):
-        # Load pre-trained models or train if needed
-        trainer = ModelTrainer()
-        trainer.load_and_prepare_data(include_sensitive=include_sensitive)
-        
-        # Try loading from disk first
-        try:
-            model = trainer.load_model(model_name)
-        except Exception:
-            trainer.train_all()
-            model = trainer.models[model_name]
+        trainer = get_cached_trainer(include_sensitive=include_sensitive)
+        model = get_cached_model(model_name, include_sensitive=include_sensitive)
         
         detector = BiasDetector()
         
@@ -165,19 +157,13 @@ st.subheader("🔄 Compare Multiple Models")
 if st.button("Compare All Models"):
   try:
     with st.spinner("Auditing all models for comparison..."):
-        trainer = ModelTrainer()
-        trainer.load_and_prepare_data(include_sensitive=True)
+        trainer = get_cached_trainer(include_sensitive=True)
         
         detector = BiasDetector()
         
         comparison_data = []
         for mname in ['logistic_regression', 'random_forest', 'xgboost']:
-            # Try loading from disk first
-            try:
-                model = trainer.load_model(mname)
-            except Exception:
-                trainer.train_all()
-                model = trainer.models[mname]
+            model = get_cached_model(mname, include_sensitive=True)
             
             audit = detector.audit_model(
                 model=model, model_name=mname,
