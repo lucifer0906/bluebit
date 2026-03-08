@@ -23,12 +23,18 @@ st.divider()
 model_name = st.selectbox("Select Model", ["logistic_regression", "random_forest", "xgboost"], index=0)
 
 if st.button("📝 Generate Full Audit Report", type="primary"):
+  try:
     with st.spinner("Running audit and generating report..."):
         trainer = ModelTrainer()
         trainer.load_and_prepare_data(include_sensitive=True)
-        trainer.train_all()
         
-        model = trainer.models[model_name]
+        # Try loading from disk first
+        try:
+            model = trainer.load_model(model_name)
+        except Exception:
+            trainer.train_all()
+            model = trainer.models[model_name]
+        
         detector = BiasDetector()
         
         audit = detector.audit_model(
@@ -55,6 +61,8 @@ if st.button("📝 Generate Full Audit Report", type="primary"):
         }
         
         st.success("✅ Report generated successfully!")
+  except Exception as e:
+    st.error(f"⚠️ Report generation failed: {str(e)}. Please ensure models are trained first (go to Upload & Train page).")
 
 if 'report' in st.session_state:
     report = st.session_state['report']

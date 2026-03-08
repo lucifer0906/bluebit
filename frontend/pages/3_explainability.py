@@ -23,12 +23,18 @@ st.divider()
 model_name = st.selectbox("Select Model", ["logistic_regression", "random_forest", "xgboost"], index=1)
 
 if st.button("🔬 Analyze Model Decisions", type="primary"):
+  try:
     with st.spinner("Computing SHAP values — this may take a moment..."):
         trainer = ModelTrainer()
         trainer.load_and_prepare_data(include_sensitive=True)
-        trainer.train_all()
         
-        model = trainer.models[model_name]
+        # Try loading from disk first
+        try:
+            model = trainer.load_model(model_name)
+        except Exception:
+            trainer.train_all()
+            model = trainer.models[model_name]
+        
         engine = ExplainabilityEngine(model, trainer.X_train, trainer.feature_names)
         engine.initialize_shap(trainer.X_test[:100])
         
@@ -39,6 +45,8 @@ if st.button("🔬 Analyze Model Decisions", type="primary"):
             'model': model
         }
         st.success("✅ SHAP analysis complete!")
+  except Exception as e:
+    st.error(f"⚠️ Analysis failed: {str(e)}. Please ensure models are trained first (go to Upload & Train page).")
 
 if 'explainability' in st.session_state:
     data = st.session_state['explainability']

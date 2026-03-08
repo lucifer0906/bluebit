@@ -23,20 +23,26 @@ st.divider()
 # Model selection
 model_name = st.selectbox(
     "Select model to audit",
-    ["logistic_regression", "random_forest", "xgboost", "adversarial_debiaser"],
+    ["logistic_regression", "random_forest", "xgboost"],
     index=0
 )
 
 include_sensitive = st.checkbox("Model includes sensitive features", value=True)
 
 if st.button("🔍 Run Audit", type="primary"):
+  try:
     with st.spinner("Running comprehensive bias audit..."):
-        # Train and audit
+        # Load pre-trained models or train if needed
         trainer = ModelTrainer()
         trainer.load_and_prepare_data(include_sensitive=include_sensitive)
-        trainer.train_all()
         
-        model = trainer.models[model_name]
+        # Try loading from disk first
+        try:
+            model = trainer.load_model(model_name)
+        except Exception:
+            trainer.train_all()
+            model = trainer.models[model_name]
+        
         detector = BiasDetector()
         
         audit = detector.audit_model(
@@ -149,22 +155,30 @@ if st.button("🔍 Run Audit", type="primary"):
                 st.warning(f"🟠 **[{severity}] {rec['category']}**\n\n{rec['finding']}\n\n**Recommendation:** {rec['recommendation']}")
             else:
                 st.info(f"🟢 **[{severity}] {rec['category']}**\n\n{rec['recommendation']}")
+  except Exception as e:
+    st.error(f"⚠️ Audit failed: {str(e)}. Please ensure models are trained first (go to Upload & Train page).")
 
 st.divider()
 
 # Multi-model comparison
 st.subheader("🔄 Compare Multiple Models")
 if st.button("Compare All Models"):
+  try:
     with st.spinner("Auditing all models for comparison..."):
         trainer = ModelTrainer()
         trainer.load_and_prepare_data(include_sensitive=True)
-        trainer.train_all()
         
         detector = BiasDetector()
         
         comparison_data = []
-        for mname in ['logistic_regression', 'random_forest', 'xgboost', 'adversarial_debiaser']:
-            model = trainer.models[mname]
+        for mname in ['logistic_regression', 'random_forest', 'xgboost']:
+            # Try loading from disk first
+            try:
+                model = trainer.load_model(mname)
+            except Exception:
+                trainer.train_all()
+                model = trainer.models[mname]
+            
             audit = detector.audit_model(
                 model=model, model_name=mname,
                 X_train=trainer.X_train, X_test=trainer.X_test,
@@ -198,3 +212,5 @@ if st.button("Compare All Models"):
             template="plotly_dark"
         )
         st.plotly_chart(fig, use_container_width=True)
+  except Exception as e:
+    st.error(f"⚠️ Comparison failed: {str(e)}. Please ensure models are trained first.")
