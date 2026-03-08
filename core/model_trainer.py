@@ -21,10 +21,18 @@ class ModelTrainer:
     
     def __init__(self, data_path: str = None):
         if data_path is None:
-            data_path = os.path.join(
+            # Check for local recruitment dataset first
+            local_path = os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
-                'data', 'synthetic_hiring_data.csv'
+                'dataset', 'data.csv'
             )
+            if os.path.exists(local_path):
+                data_path = local_path
+            else:
+                data_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    'data', 'synthetic_hiring_data.csv'
+                )
         self.data_path = data_path
         self.label_encoders = {}
         self.scaler = StandardScaler()
@@ -33,39 +41,50 @@ class ModelTrainer:
     def load_and_prepare_data(self, include_sensitive: bool = True):
         """
         Load dataset and prepare features.
-        
-        Args:
-            include_sensitive: If True, include gender/race as features (biased model).
-                             If False, exclude them (potentially fairer model).
         """
         df = pd.read_csv(self.data_path)
         
-        # Store sensitive features separately
-        self.sensitive_features = df[['gender', 'race']].copy()
-        
+        # Determine columns based on dataset
+        if 'HiringDecision' in df.columns:
+            # Recruitment Dataset (Local)
+            target_col = 'HiringDecision'
+            sensitive_cols = ['Gender', 'Age']
+            categorical_cols = ['Gender']
+            base_features = [c for c in df.columns if c not in [target_col] + sensitive_cols]
+            self.sensitive_features = df[sensitive_cols].copy()
+            # Ensure Gender is numeric
+            if df['Gender'].dtype == object:
+                df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
+        else:
+            # Synthetic Dataset
+            target_col = 'hired'
+            sensitive_cols = ['gender', 'race']
+            categorical_cols = ['gender', 'race']
+            base_features = [
+                'education_years', 'experience_years', 'skill_score',
+                'interview_score', 'certification_count', 'project_count',
+                'gpa', 'age'
+            ]
+            self.sensitive_features = df[sensitive_cols].copy()
+
         # Encode categorical variables
-        categorical_cols = ['gender', 'race']
         for col in categorical_cols:
-            le = LabelEncoder()
-            df[f'{col}_encoded'] = le.fit_transform(df[col])
-            self.label_encoders[col] = le
-        
-        # Define features
-        base_features = [
-            'education_years', 'experience_years', 'skill_score',
-            'interview_score', 'certification_count', 'project_count',
-            'gpa', 'age'
-        ]
+            if df[col].dtype == object or col not in df.columns:
+                le = LabelEncoder()
+                # Handle potential missing cols in synthetic
+                if col in df.columns:
+                    df[f'{col}_encoded'] = le.fit_transform(df[col])
+                    self.label_encoders[col] = le
         
         if include_sensitive:
-            feature_cols = base_features + ['gender_encoded', 'race_encoded']
-            self.feature_names = base_features + ['gender', 'race']
+            feature_cols = base_features + sensitive_cols
+            self.feature_names = base_features + sensitive_cols
         else:
             feature_cols = base_features
             self.feature_names = base_features
         
         X = df[feature_cols].values
-        y = df['hired'].values
+        y = df[target_col].values
         
         # Split data
         self.X_train, self.X_test, self.y_train, self.y_test, \
@@ -104,12 +123,32 @@ class ModelTrainer:
         model.fit(self.X_train, self.y_train)
         self.models['xgboost'] = model
         return model
+
+    def train_adversarial_debiaser(self):
+        """Train an Adversarial Debiasing model."""
+        from core.debiasing import AdversarialDebiaser
+        
+        # Determine sensitive attribute name for the debiaser
+        # If multiple, use the first one (usually Gender)
+        sensitive_attr = self.sensitive_features.columns[0]
+        
+        model = AdversarialDebiaser(
+            feature_names=self.feature_names,
+            privileged_groups=[{sensitive_attr: 1}],
+            unprivileged_groups=[{sensitive_attr: 0}]
+        )
+        
+        model.fit(self.X_train, self.y_train)
+        self.models['adversarial_debiaser'] = model
+        return model
     
-    def train_all(self):
+    def train_all(self, include_debiased: bool = True):
         """Train all models and return them."""
         self.train_logistic_regression()
         self.train_random_forest()
         self.train_xgboost()
+        if include_debiased:
+            self.train_adversarial_debiaser()
         return self.models
     
     def save_models(self):
