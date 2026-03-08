@@ -19,35 +19,90 @@ AI-powered hiring systems can inadvertently encode and amplify biases related to
 
 ## 🏗️ System Architecture
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   AEGIS AI Dashboard                │
-│              (Streamlit Frontend)                   │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
-│  │ Upload   │  │ Audit    │  │ Report           │  │
-│  │ Model &  │  │ Results  │  │ & Recommendations│  │
-│  │ Dataset  │  │ Dashboard│  │ Generator        │  │
-│  └────┬─────┘  └────┬─────┘  └────────┬─────────┘  │
-│       │              │                 │            │
-├───────┴──────────────┴─────────────────┴────────────┤
-│                  FastAPI Backend                     │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ┌──────────────┐  ┌────────────┐  ┌────────────┐  │
-│  │ Bias         │  │ Explain-   │  │ Fairness   │  │
-│  │ Detection    │  │ ability    │  │ Metrics    │  │
-│  │ Engine       │  │ Module     │  │ Calculator │  │
-│  │              │  │ (SHAP/LIME)│  │            │  │
-│  └──────────────┘  └────────────┘  └────────────┘  │
-│                                                     │
-│  ┌──────────────┐  ┌────────────┐  ┌────────────┐  │
-│  │ Model        │  │ Dataset    │  │ Report     │  │
-│  │ Trainer      │  │ Generator  │  │ Generator  │  │
-│  └──────────────┘  └────────────┘  └────────────┘  │
-│                                                     │
-└─────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+
+%% ===== Style Definitions =====
+classDef frontend fill:#2b2b2b,stroke:#ffffff,stroke-width:2px,color:#ffffff;
+classDef backend fill:#2b2b2b,stroke:#ffffff,stroke-width:2px,color:#ffffff;
+classDef core fill:#2b2b2b,stroke:#ffffff,stroke-width:2px,color:#ffffff;
+classDef data fill:#2b2b2b,stroke:#ffffff,stroke-width:2px,color:#ffffff;
+
+linkStyle default stroke:#ffffff,color:#ffffff
+
+%% ===== User =====
+User([User / Recruiter])
+
+%% ===== Frontend =====
+subgraph Frontend [Streamlit Dashboard]
+    Dashboard[Main Dashboard\napp.py]:::frontend
+    Upload[Upload Model & Dataset\n1_upload.py]:::frontend
+    Audit[Bias Audit Dashboard\n2_audit.py]:::frontend
+    Explain[Explainability Viewer\n3_explainability.py]:::frontend
+    ReportUI[Download Audit Report\n4_report.py]:::frontend
+
+    Dashboard --> Upload
+    Dashboard --> Audit
+    Dashboard --> Explain
+    Dashboard --> ReportUI
+end
+
+User --> Dashboard
+
+%% ===== Backend =====
+subgraph Backend [FastAPI Backend]
+    API[API Router\nmain.py / routes.py]:::backend
+end
+
+Upload <-->|HTTP/REST| API
+Audit <-->|HTTP/REST| API
+Explain <-->|HTTP/REST| API
+ReportUI <-->|HTTP/REST| API
+
+%% ===== Core ML Engine =====
+subgraph CoreEngine [Bias Audit Pipeline]
+
+    Trainer[Model Trainer\nmodel_trainer.py]:::core
+    Debias[Debiasing Module\nAIF360]:::core
+    Predictor[Prediction Engine]:::core
+
+    BiasDet[Bias Detection Engine\nbias_detector.py]:::core
+    Fairness[Fairness Metrics\nfairness_metrics.py]:::core
+    ExplainMod[Explainability\nSHAP / LIME]:::core
+    ReportGen[Report Generator\nreport_generator.py]:::core
+
+    Trainer --> Debias
+    Debias --> Predictor
+
+    Predictor --> BiasDet
+    Predictor --> ExplainMod
+
+    BiasDet --> Fairness
+    Fairness --> ReportGen
+    ExplainMod --> ReportGen
+end
+
+API --> Trainer
+API --> BiasDet
+API --> ExplainMod
+API --> ReportGen
+
+%% ===== Data Layer =====
+subgraph Data [Data & Storage]
+
+    Datasets[(Datasets\nCSV Files)]:::data
+    Models[(Saved Models\nPKL / Joblib)]:::data
+
+end
+
+Upload -.->|Save| Datasets
+Upload -.->|Save| Models
+
+Trainer -.->|Read| Datasets
+Trainer -.->|Save| Models
+
+Predictor -.->|Load| Models
+Predictor -.->|Use| Datasets
 ```
 
 ## ✨ Key Features
