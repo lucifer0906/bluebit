@@ -1,0 +1,216 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>AEGIS AI - Ethical Audit Report</title>
+            <style>
+                body {
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    max-width: 900px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background: #0a0a1a;
+                    color: #e0e0e0;
+                }
+                h1 {
+                    text-align: center;
+                    color: #00d4ff;
+                    border-bottom: 2px solid #00d4ff;
+                    padding-bottom: 10px;
+                }
+                h2 { color: #00d4ff; }
+                .header {
+                    text-align: center;
+                    padding: 20px;
+                    background: linear-gradient(135deg, #0a1628, #1a2744);
+                    border-radius: 10px;
+                    margin-bottom: 20px;
+                    border: 1px solid #00d4ff33;
+                }
+                .grade-circle {
+                    width: 120px; height: 120px;
+                    border-radius: 50%;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 48px;
+                    font-weight: bold;
+                    margin: 10px;
+                    border: 4px solid;
+                }
+                .grade-green { border-color: #22c55e; color: #22c55e; }
+                .grade-yellow { border-color: #eab308; color: #eab308; }
+                .grade-orange { border-color: #f97316; color: #f97316; }
+                .grade-red { border-color: #ef4444; color: #ef4444; }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 15px 0;
+                    background: #111827;
+                    border-radius: 8px;
+                    overflow: hidden;
+                }
+                th {
+                    background: #1e3a5f;
+                    color: #00d4ff;
+                    padding: 12px;
+                    text-align: left;
+                }
+                td { padding: 10px 12px; border-bottom: 1px solid #1f2937; }
+                tr:hover { background: #1f2937; }
+                .pass { }
+                .fail { background: #1a0000; }
+                .status-pass { color: #22c55e; font-weight: bold; }
+                .status-fail { color: #ef4444; font-weight: bold; }
+                .recommendation {
+                    padding: 15px;
+                    margin: 10px 0;
+                    border-radius: 8px;
+                    border-left: 4px solid;
+                }
+                .critical { border-color: #ef4444; background: #1a0000; }
+                .high { border-color: #f97316; background: #1a1000; }
+                .info { border-color: #22c55e; background: #001a00; }
+                .severity-badge {
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    margin-right: 8px;
+                }
+                .critical .severity-badge { background: #ef4444; color: white; }
+                .high .severity-badge { background: #f97316; color: white; }
+                .info .severity-badge { background: #22c55e; color: white; }
+                .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <h1>⚖️ AEGIS AI - Ethical Audit Report</h1>
+            
+            <div class="header">
+                <h2>xgboost</h2>
+                <p>Model Type: XGBClassifier | Accuracy: 0.9244</p>
+                <div class="grade-circle grade-red">
+                    F
+                </div>
+                <p>Fairness Score: <strong>33.3%</strong> — Failing</p>
+                <p>Tests Passed: 3 / 9</p>
+            </div>
+            
+            <h2>📊 Fairness Metrics Scorecard</h2>
+            <table>
+                <tr>
+                    <th>Metric</th>
+                    <th>Attribute</th>
+                    <th>Details</th>
+                    <th>Status</th>
+                </tr>
+                
+            <tr class="pass">
+                <td>✅ Demographic Parity</td>
+                <td>Gender</td>
+                <td>{np.int64(0): 0.2719, np.int64(1): 0.2568}</td>
+                <td class="status-pass">PASS</td>
+            </tr>
+            
+            <tr class="fail">
+                <td>❌ Demographic Parity</td>
+                <td>Age</td>
+                <td>{np.int64(43): 0.1579, np.int64(50): 0.2941, np.int64(22): 0.2308, np.int64(23): 0.0909, np.int64(48): 0.2, np.int64(24): 0.2727, np.int64(29): 0.1818, np.int64(31): 0.2778, np.int64(42): 0.2667, np.int64(37): 0.2, np.int64(45): 0.3182, np.int64(39): 0.3636, np.int64(49): 0.4211, np.int64(38): 0.2, np.int64(20): 0.2, np.int64(32): 0.3077, np.int64(33): 0.2727, np.int64(26): 0.4667, np.int64(40): 0.2143, np.int64(21): 0.2222, np.int64(36): 0.1579, np.int64(47): 0.1875, np.int64(28): 0.0, np.int64(27): 0.4375, np.int64(44): 0.381, np.int64(41): 0.1667, np.int64(35): 0.2, np.int64(30): 0.4444, np.int64(25): 0.2308, np.int64(46): 0.3846, np.int64(34): 0.25}</td>
+                <td class="status-fail">FAIL</td>
+            </tr>
+            
+            <tr class="fail">
+                <td>❌ Equal Opportunity</td>
+                <td>Gender</td>
+                <td>{np.int64(0): 0.7867, np.int64(1): 0.8889}</td>
+                <td class="status-fail">FAIL</td>
+            </tr>
+            
+            <tr class="fail">
+                <td>❌ Equal Opportunity</td>
+                <td>Age</td>
+                <td>{np.int64(43): 1.0, np.int64(50): 0.8, np.int64(22): 1.0, np.int64(23): 0.5, np.int64(48): 0.5, np.int64(24): 0.6667, np.int64(29): 1.0, np.int64(31): 0.8, np.int64(42): 0.6, np.int64(37): 1.0, np.int64(45): 0.875, np.int64(39): 1.0, np.int64(49): 1.0, np.int64(38): 1.0, np.int64(20): 0.6667, np.int64(32): 0.8, np.int64(33): 1.0, np.int64(26): 0.875, np.int64(40): 1.0, np.int64(21): 1.0, np.int64(36): 0.75, np.int64(47): 0.75, np.int64(28): 0.0, np.int64(27): 0.8571, np.int64(44): 0.875, np.int64(41): 1.0, np.int64(35): 0.75, np.int64(30): 1.0, np.int64(25): 1.0, np.int64(46): 1.0, np.int64(34): 0.6667}</td>
+                <td class="status-fail">FAIL</td>
+            </tr>
+            
+            <tr class="pass">
+                <td>✅ Calibration</td>
+                <td>-</td>
+                <td>Brier Score: 0.0616</td>
+                <td class="status-pass">PASS</td>
+            </tr>
+            
+            <tr class="pass">
+                <td>✅ Disparate Impact</td>
+                <td>Gender</td>
+                <td>{np.int64(0): 0.2719, np.int64(1): 0.2568}</td>
+                <td class="status-pass">PASS</td>
+            </tr>
+            
+            <tr class="fail">
+                <td>❌ Disparate Impact</td>
+                <td>Age</td>
+                <td>{np.int64(43): 0.1579, np.int64(50): 0.2941, np.int64(22): 0.2308, np.int64(23): 0.0909, np.int64(48): 0.2, np.int64(24): 0.2727, np.int64(29): 0.1818, np.int64(31): 0.2778, np.int64(42): 0.2667, np.int64(37): 0.2, np.int64(45): 0.3182, np.int64(39): 0.3636, np.int64(49): 0.4211, np.int64(38): 0.2, np.int64(20): 0.2, np.int64(32): 0.3077, np.int64(33): 0.2727, np.int64(26): 0.4667, np.int64(40): 0.2143, np.int64(21): 0.2222, np.int64(36): 0.1579, np.int64(47): 0.1875, np.int64(28): 0.0, np.int64(27): 0.4375, np.int64(44): 0.381, np.int64(41): 0.1667, np.int64(35): 0.2, np.int64(30): 0.4444, np.int64(25): 0.2308, np.int64(46): 0.3846, np.int64(34): 0.25}</td>
+                <td class="status-fail">FAIL</td>
+            </tr>
+            
+            <tr class="fail">
+                <td>❌ Transparency Score</td>
+                <td>-</td>
+                <td>Score: 45/100</td>
+                <td class="status-fail">FAIL</td>
+            </tr>
+            
+            <tr class="fail">
+                <td>❌ Privacy Preservation</td>
+                <td>-</td>
+                <td>Sensitive features used: ['Gender', 'Age']</td>
+                <td class="status-fail">FAIL</td>
+            </tr>
+            
+            </table>
+            
+            <h2>💡 Recommendations</h2>
+            
+            <div class="recommendation high">
+                <span class="severity-badge">HIGH</span>
+                <strong>Demographic Parity</strong>
+                <p><em>Finding:</em> Unequal selection rates across Age groups: {np.int64(43): 0.1579, np.int64(50): 0.2941, np.int64(22): 0.2308, np.int64(23): 0.0909, np.int64(48): 0.2, np.int64(24): 0.2727, np.int64(29): 0.1818, np.int64(31): 0.2778, np.int64(42): 0.2667, np.int64(37): 0.2, np.int64(45): 0.3182, np.int64(39): 0.3636, np.int64(49): 0.4211, np.int64(38): 0.2, np.int64(20): 0.2, np.int64(32): 0.3077, np.int64(33): 0.2727, np.int64(26): 0.4667, np.int64(40): 0.2143, np.int64(21): 0.2222, np.int64(36): 0.1579, np.int64(47): 0.1875, np.int64(28): 0.0, np.int64(27): 0.4375, np.int64(44): 0.381, np.int64(41): 0.1667, np.int64(35): 0.2, np.int64(30): 0.4444, np.int64(25): 0.2308, np.int64(46): 0.3846, np.int64(34): 0.25}</p>
+                <p><em>Recommendation:</em> Re-train the model without Age as a feature, or apply post-processing calibration to equalize rates.</p>
+                <p><em>Impact:</em> Candidates from certain groups are systematically disadvantaged.</p>
+            </div>
+            
+            <div class="recommendation high">
+                <span class="severity-badge">HIGH</span>
+                <strong>Equal Opportunity</strong>
+                <p><em>Finding:</em> Unequal true positive rates across Gender: {np.int64(0): 0.7867, np.int64(1): 0.8889}</p>
+                <p><em>Recommendation:</em> Qualified candidates from underrepresented Gender groups are being rejected at higher rates. Consider threshold adjustment.</p>
+                <p><em>Impact:</em> Qualified candidates are being unfairly rejected.</p>
+            </div>
+            
+            <div class="recommendation high">
+                <span class="severity-badge">HIGH</span>
+                <strong>Equal Opportunity</strong>
+                <p><em>Finding:</em> Unequal true positive rates across Age: {np.int64(43): 1.0, np.int64(50): 0.8, np.int64(22): 1.0, np.int64(23): 0.5, np.int64(48): 0.5, np.int64(24): 0.6667, np.int64(29): 1.0, np.int64(31): 0.8, np.int64(42): 0.6, np.int64(37): 1.0, np.int64(45): 0.875, np.int64(39): 1.0, np.int64(49): 1.0, np.int64(38): 1.0, np.int64(20): 0.6667, np.int64(32): 0.8, np.int64(33): 1.0, np.int64(26): 0.875, np.int64(40): 1.0, np.int64(21): 1.0, np.int64(36): 0.75, np.int64(47): 0.75, np.int64(28): 0.0, np.int64(27): 0.8571, np.int64(44): 0.875, np.int64(41): 1.0, np.int64(35): 0.75, np.int64(30): 1.0, np.int64(25): 1.0, np.int64(46): 1.0, np.int64(34): 0.6667}</p>
+                <p><em>Recommendation:</em> Qualified candidates from underrepresented Age groups are being rejected at higher rates. Consider threshold adjustment.</p>
+                <p><em>Impact:</em> Qualified candidates are being unfairly rejected.</p>
+            </div>
+            
+            <div class="recommendation critical">
+                <span class="severity-badge">CRITICAL</span>
+                <strong>Privacy</strong>
+                <p><em>Finding:</em> Sensitive features used directly: ['Gender', 'Age']</p>
+                <p><em>Recommendation:</em> Remove sensitive attributes from model input features. Use fairness-aware training if demographic information is needed.</p>
+                <p><em>Impact:</em> Direct use of protected attributes in decisions is illegal in many jurisdictions.</p>
+            </div>
+            
+            
+            <div class="footer">
+                <p>Generated by AEGIS AI — Ethical AI Auditing Framework</p>
+                <p>Bluebit Hackathon 2026 | Team MISAL PAV</p>
+                <p>2026-03-08 15:27:40</p>
+            </div>
+        </body>
+        </html>
+        

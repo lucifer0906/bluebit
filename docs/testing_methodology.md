@@ -1,113 +1,59 @@
 # Testing Methodology — AEGIS AI
 
 ## Overview
+AEGIS AI implements a comprehensive testing pipeline to validate bias detection accuracy, fairness metric correctness, and API reliability.
 
-AEGIS AI employs a multi-layered testing approach to validate the correctness of its bias detection algorithms, fairness metrics, and audit pipeline.
+## Test Architecture
 
----
+### 1. Unit Tests — Fairness Metrics (`test_fairness_metrics.py`)
+**20 tests** covering all core fairness calculations:
 
-## 1. Unit Testing
+| Test Category | Tests | Purpose |
+|---|---|---|
+| Demographic Parity | 5 | Validates equal selection rate computation across groups using the 4/5ths rule (threshold > 0.8) |
+| Equal Opportunity | 4 | Verifies true positive rate calculations and max difference thresholds |
+| Calibration | 3 | Tests Brier score computation for prediction confidence matching |
+| Disparate Impact | 2 | Validates impact ratio calculations |
+| Transparency Score | 3 | Ensures interpretability scoring for different model types |
+| Privacy Check | 3 | Detects usage of sensitive features (gender, race, age) |
+| Full Audit | 2 | End-to-end metric aggregation and pass rate percentage |
 
-### Fairness Metrics (`test_fairness_metrics.py`)
-- **20+ test cases** covering all six core metrics
-- Tests validate both fair and biased scenarios
-- Each metric is tested for:
-  - Correct output structure (keys, types)
-  - Pass/fail accuracy with known inputs
-  - Edge cases (perfect predictions, reversed predictions, equal groups)
+### 2. Integration Tests — Bias Detector (`test_bias_detector.py`)
+**8 tests** validating the full audit pipeline:
 
-### Bias Detector (`test_bias_detector.py`)
-- End-to-end audit pipeline validation
-- Verifies presence of all required output fields: `performance`, `fairness`, `overall_verdict`, `recommendations`
-- Validates grade computation (A–F scale) and score range (0–100)
-- Multi-model comparison tests
+- Audit result structure (dict with required keys)
+- Performance metrics (accuracy present and valid)
+- Fairness analysis (metrics computed correctly)
+- Verdict generation (grade A-F, score 0-100)
+- Recommendation engine (actionable suggestions generated)
+- Model comparison (multi-model ranking by fairness score)
 
-### API Tests (`test_api.py`)
-- FastAPI endpoint testing with `TestClient`
-- Health check, audit, compare, and report endpoints
-- Error handling for invalid model names
+### 3. API Tests (`test_api.py`)
+**9 tests** covering all FastAPI endpoints:
 
----
+- `GET /health` — Health check returns 200 with status
+- `GET /` — Root endpoint returns project metadata
+- `POST /audit` — Full bias audit with JSON serialization
+- `POST /compare` — Multi-model comparison
+- `GET /report` — HTML report generation
+- Error handling (invalid model returns 404)
 
-## 2. Metrics Validation Approach
-
-### Demographic Parity
-- **Method**: Compare selection rates across protected groups
-- **Threshold**: 4/5ths rule (ratio ≥ 0.8)
-- **Test Strategy**: Create known biased data (Male 90% vs Female 30%) and verify failure; create balanced data and verify pass
-
-### Equal Opportunity
-- **Method**: Compare True Positive Rates across groups
-- **Threshold**: Max TPR difference ≤ 0.1
-- **Test Strategy**: Perfect predictions should pass; skewed predictions should fail
-
-### Calibration
-- **Method**: Brier score computation
-- **Threshold**: Score ≤ 0.25
-- **Test Strategy**: Well-calibrated probabilities should pass; reversed probabilities should fail
-
-### Disparate Impact
-- **Method**: Ratio of selection rates between groups
-- **Threshold**: Ratio ≥ 0.8 (same as demographic parity, different computation)
-- **Test Strategy**: Equal outcomes should always pass
-
-### Transparency Score
-- **Method**: Model-type-based interpretability rating
-- **Test Strategy**: Logistic regression should score higher than ensemble/boosting models
-
-### Privacy Check
-- **Method**: Feature name analysis for sensitive attributes
-- **Test Strategy**: Features like 'gender', 'race', 'age' should be flagged; technical features should pass
-
----
-
-## 3. Integration Testing
-
-- Full pipeline test: data generation → model training → audit → report
-- API integration: POST audit request → verify response structure
-- Frontend-backend communication validation
-
----
-
-## 4. Test Data Strategy
-
-| Dataset | Purpose | Size |
-|---------|---------|------|
-| Synthetic hiring data | Primary test dataset | 2000 rows |
-| Known biased fixtures | Metric validation | 200 rows |
-| Edge case arrays | Boundary testing | 4-8 rows |
-
-### Bias Injection
-The synthetic dataset intentionally injects:
-- **Gender bias**: +5 skill for Male, -3 for Female
-- **Race bias**: +4 for White, -3 for Black, -2 for Hispanic
-- **Age bias**: -4 for candidates over 45
-
-This ensures the audit system correctly detects known biases.
-
----
-
-## 5. Running Tests
+## Running Tests
 
 ```bash
-# Run all tests
-pytest tests/ -v
+# Full suite
+python -m pytest tests/ -v
 
-# Run with coverage
-pytest tests/ --cov=core --cov-report=html
+# With coverage
+python -m pytest tests/ --cov=core --cov-report=html
 
-# Run specific test file
-pytest tests/test_fairness_metrics.py -v
-
-# Run specific test class
-pytest tests/test_fairness_metrics.py::TestDemographicParity -v
+# Specific module
+python -m pytest tests/test_fairness_metrics.py -v
 ```
 
----
+## Test Data
+- **Synthetic dataset**: 2,000 candidates with engineered gender (+5 male bias), race (+4 white bias), and age (penalty for >45) biases
+- **Local recruitment dataset**: 8,000+ real candidates from `dataset/data.csv` with Gender and HiringDecision attributes
 
-## 6. Continuous Validation
-
-- Tests are designed to run independently (no shared state)
-- Fixtures provide fresh data for each test
-- Random seeds (42) ensure reproducible results
-- All tests should complete in under 60 seconds
+## Validation Results
+All **39/39 tests pass** consistently across runs (avg runtime: ~100s).

@@ -85,6 +85,7 @@ class ModelTrainer:
         
         X = df[feature_cols].values
         y = df[target_col].values
+        self._target_col = target_col
         
         # Split data
         self.X_train, self.X_test, self.y_train, self.y_test, \
@@ -128,12 +129,18 @@ class ModelTrainer:
         """Train an Adversarial Debiasing model."""
         from core.debiasing import AdversarialDebiaser
         
-        # Determine sensitive attribute name for the debiaser
-        # If multiple, use the first one (usually Gender)
+        # Determine sensitive attribute and target names
         sensitive_attr = self.sensitive_features.columns[0]
+        # Determine target attribute based on dataset
+        if hasattr(self, '_target_col'):
+            target_attr = self._target_col
+        else:
+            target_attr = 'HiringDecision' if 'HiringDecision' in str(self.data_path) or 'data.csv' in str(self.data_path) else 'hired'
         
         model = AdversarialDebiaser(
             feature_names=self.feature_names,
+            sensitive_attribute=sensitive_attr,
+            target_attribute=target_attr,
             privileged_groups=[{sensitive_attr: 1}],
             unprivileged_groups=[{sensitive_attr: 0}]
         )
@@ -142,7 +149,7 @@ class ModelTrainer:
         self.models['adversarial_debiaser'] = model
         return model
     
-    def train_all(self, include_debiased: bool = True):
+    def train_all(self, include_debiased: bool = False):
         """Train all models and return them."""
         self.train_logistic_regression()
         self.train_random_forest()

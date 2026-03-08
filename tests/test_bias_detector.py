@@ -94,21 +94,19 @@ class TestBiasDetector:
         assert isinstance(result['recommendations'], list)
 
     def test_compare_models(self, detector, trained_model):
-        models = {
-            'lr': trained_model.models['logistic_regression'],
-            'rf': trained_model.models['random_forest'],
-        }
-        results = detector.compare_models(
-            models=models,
-            X_train=trained_model.X_train,
-            X_test=trained_model.X_test,
-            y_true=trained_model.y_test,
-            sensitive_features=trained_model.sensitive_test,
-            feature_names=trained_model.feature_names,
-        )
-        assert len(results) == 2
-        assert 'lr' in results
-        assert 'rf' in results
+        # Audit two models first so compare_models has data
+        for mname in ['logistic_regression', 'random_forest']:
+            model = trained_model.models[mname]
+            detector.audit_model(
+                model=model, model_name=mname,
+                X_train=trained_model.X_train, X_test=trained_model.X_test,
+                y_true=trained_model.y_test, sensitive_features=trained_model.sensitive_test,
+                feature_names=trained_model.feature_names,
+            )
+        results = detector.compare_models()
+        assert 'models' in results
+        assert 'logistic_regression' in results['models']
+        assert 'random_forest' in results['models']
 
     def test_score_between_0_and_100(self, detector, trained_model):
         model = trained_model.models['random_forest']
