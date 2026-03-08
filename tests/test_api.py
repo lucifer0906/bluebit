@@ -63,8 +63,7 @@ class TestAuditEndpoint:
             "include_sensitive_features": True
         }
         response = client.post("/api/audit", json=payload)
-        # Should return error or handle gracefully
-        assert response.status_code in [200, 400, 404, 422, 500]
+        assert response.status_code == 404
 
 
 class TestCompareEndpoint:

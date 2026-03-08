@@ -73,8 +73,8 @@ def run_audit(request: AuditRequest):
         })
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Audit failed. Please ensure models are trained.")
 
 
 @router.post("/compare")
@@ -87,6 +87,8 @@ def compare_models(request: CompareRequest):
         
         results = {}
         for model_name in request.model_names:
+            if model_name not in ALLOWED_MODELS:
+                raise HTTPException(status_code=400, detail=f"Unknown model '{model_name}'. Allowed: {', '.join(sorted(ALLOWED_MODELS))}")
             try:
                 model = trainer.load_model(model_name)
             except FileNotFoundError:
@@ -100,8 +102,8 @@ def compare_models(request: CompareRequest):
         return sanitize_for_json(comparison)
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Comparison failed. Please ensure models are trained.")
 
 
 @router.post("/report/{model_name}")
@@ -125,5 +127,7 @@ def generate_report(model_name: str):
             'report_path': output_path,
             'summary': generator.generate_text_summary(audit)
         })
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Report generation failed. Please ensure models are trained.")
