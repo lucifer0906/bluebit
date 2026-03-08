@@ -7,6 +7,7 @@ from backend.api.schemas import AuditRequest, CompareRequest
 from core.model_trainer import ModelTrainer
 from core.bias_detector import BiasDetector
 from core.report_generator import ReportGenerator
+from core.utils import sanitize_for_json
 from typing import Dict, Any
 import os
 
@@ -51,7 +52,7 @@ def run_audit(request: AuditRequest):
         audit = _run_audit(request.model_name, request.include_sensitive_features)
         
         verdict = audit.get('overall_verdict', {})
-        return {
+        return sanitize_for_json({
             'model_name': audit['model_name'],
             'model_type': audit['model_type'],
             'accuracy': audit['performance']['accuracy'],
@@ -64,7 +65,7 @@ def run_audit(request: AuditRequest):
             'metrics': audit['fairness']['metrics'],
             'recommendations': audit['recommendations'],
             'feature_importance': audit['explainability']['feature_importance'],
-        }
+        })
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -96,7 +97,7 @@ def compare_models(request: CompareRequest):
             results[model_name] = audit
         
         comparison = detector.compare_models()
-        return comparison
+        return sanitize_for_json(comparison)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -114,10 +115,10 @@ def generate_report(model_name: str):
         )
         generator.save_report(audit, output_path)
         
-        return {
+        return sanitize_for_json({
             'message': f'Report generated for {model_name}',
             'report_path': output_path,
             'summary': generator.generate_text_summary(audit)
-        }
+        })
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

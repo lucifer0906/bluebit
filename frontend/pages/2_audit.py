@@ -23,7 +23,7 @@ st.divider()
 # Model selection
 model_name = st.selectbox(
     "Select model to audit",
-    ["logistic_regression", "random_forest", "xgboost"],
+    ["logistic_regression", "random_forest", "xgboost", "adversarial_debiaser"],
     index=0
 )
 
@@ -163,7 +163,7 @@ if st.button("Compare All Models"):
         detector = BiasDetector()
         
         comparison_data = []
-        for mname in ['logistic_regression', 'random_forest', 'xgboost']:
+        for mname in ['logistic_regression', 'random_forest', 'xgboost', 'adversarial_debiaser']:
             model = trainer.models[mname]
             audit = detector.audit_model(
                 model=model, model_name=mname,

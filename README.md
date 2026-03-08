@@ -11,6 +11,12 @@
 
 AI-powered hiring systems can inadvertently encode and amplify biases related to gender, race, age, and other protected attributes. AEGIS AI is an **Ethical AI Auditing Framework** that detects, quantifies, and explains bias in hiring ML models, providing actionable recommendations for improvement.
 
+## 📸 Screenshots
+
+| Dashboard Home | Bias Audit | Upload & Train |
+|---|---|---|
+| ![Home](docs/screenshots/dashboard_home.png) | ![Audit](docs/screenshots/audit_dashboard.png) | ![Upload](docs/screenshots/upload_train.png) |
+
 ## 🏗️ System Architecture
 
 ```
@@ -59,7 +65,10 @@ AI-powered hiring systems can inadvertently encode and amplify biases related to
 
 ### Bonus Features 🌟
 - Multiple AI model comparison (Logistic Regression, Random Forest, XGBoost)
-- Automated testing pipeline
+- **Adversarial Debiasing** (AIF360) — In-processing bias mitigation with GPU acceleration
+- Automated testing pipeline (39/39 tests passing)
+- HTML audit report generation with visual scorecards
+- Real recruitment dataset support (`dataset/data.csv`)
 
 ## 🛠️ Tech Stack
 
@@ -69,10 +78,11 @@ AI-powered hiring systems can inadvertently encode and amplify biases related to
 | **Backend** | FastAPI + Python |
 | **ML Models** | Scikit-learn, XGBoost |
 | **Explainability** | SHAP, LIME |
-| **Fairness Metrics** | AIF360 / Custom Implementation |
+| **Debiasing** | AIF360 (Adversarial Debiasing) |
 | **Visualization** | Plotly, Matplotlib, Seaborn |
 | **Report Generation** | Jinja2 + HTML/CSS |
 | **Data Processing** | Pandas, NumPy |
+| **GPU Acceleration** | TensorFlow + CUDA (RTX 4060) |
 
 ## 📁 Project Structure
 
@@ -211,7 +221,7 @@ python -m pytest tests/ --cov=core --cov-report=html
 
 | Name | Role |
 |------|------|
-| Team Member 1 | Backend & ML |
+| Akshay | Backend & ML |
 | Team Member 2 | Frontend & Visualization |
 | Team Member 3 | Testing & Documentation |
 
