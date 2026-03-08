@@ -1,8 +1,8 @@
-# ⚖️ AEGIS AI — Jedi Code Compliance System
+# ⚖️ AEGIS AI — AI Ethics Governance & Integrity System 
 
 ### Ethical AI Auditing Framework for Hiring System Bias Detection
 
-> **Bluebit Hackathon 2026 | Problem Statement 9 (PS9)**
+> **Bluebit 4.0 Hackathon 2026 | Problem Statement 9 (PS9)**
 > **Team: MISAL PAV**
 
 ---
@@ -68,7 +68,7 @@ subgraph CoreEngine [Bias Audit Pipeline]
 
     BiasDet[Bias Detection Engine\nbias_detector.py]:::core
     Fairness[Fairness Metrics\nfairness_metrics.py]:::core
-    ExplainMod[Explainability\nSHAP / LIME]:::core
+    ExplainMod[Explainability\nSHAP]:::core
     ReportGen[Report Generator\nreport_generator.py]:::core
 
     Trainer --> Debias
@@ -133,7 +133,7 @@ sequenceDiagram
     Backend->>BiasEngine: 5. Compute fairness metrics
     BiasEngine-->>Backend: Bias scores (DP, EO, DI)
 
-    Backend->>Explainability: 6. Generate SHAP/LIME explanations
+    Backend->>Explainability: 6. Generate SHAP explanations
     Explainability-->>Backend: Feature importance
 
     Backend->>Report: 7. Generate audit report
@@ -179,7 +179,7 @@ Model[(Trained ML Model<br/>LogReg / RandomForest / XGBoost)]:::data
 
 Prediction[Prediction Engine<br/>Generate Hiring Decisions]:::stage
 Fairness[Fairness Metrics Engine<br/>Demographic Parity<br/>Equal Opportunity<br/>Disparate Impact<br/>Calibration]:::stage
-Explain[Explainability Engine<br/>SHAP / LIME Feature Importance]:::stage
+Explain[Explainability Engine<br/>SHAP Feature Importance]:::stage
 Debias[Bias Mitigation<br/>AIF360 Adversarial Debiasing]:::stage
 Report[Audit Report Generator<br/>Scorecards + Recommendations]:::stage
 
@@ -201,7 +201,7 @@ Debias --> Report
 | **Frontend** | Streamlit |
 | **Backend** | FastAPI + Python |
 | **ML Models** | Scikit-learn, XGBoost |
-| **Explainability** | SHAP, LIME |
+| **Explainability** | SHAP |
 | **Debiasing** | AIF360 (Adversarial Debiasing) |
 | **Visualization** | Plotly, Matplotlib, Seaborn |
 | **Report Generation** | Jinja2 + HTML/CSS |
@@ -230,7 +230,7 @@ bluebit/
 │   ├── __init__.py
 │   ├── bias_detector.py        # Main bias detection logic
 │   ├── fairness_metrics.py     # Demographic parity, equal opportunity, etc.
-│   ├── explainability.py       # SHAP/LIME explanations
+│   ├── explainability.py       # SHAP explanations
 │   ├── model_trainer.py        # Train biased models for testing
 │   ├── report_generator.py     # Generate audit reports
 │   └── utils.py                # Helper functions
@@ -351,4 +351,4 @@ python -m pytest tests/ --cov=core --cov-report=html
 
 ## 📄 License
 
-This project was built during the Bluebit Hackathon 2026 (March 8, 2026).
+This project was built during the Bluebit 4.0 Hackathon 2026 (March 8, 2026).
