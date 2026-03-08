@@ -14,20 +14,10 @@ import os
 router = APIRouter()
 
 
-def _run_audit(model_name: str, include_sensitive: bool = True) -> Dict[str, Any]:
-    """Helper to run a single model audit."""
-    trainer = ModelTrainer()
-    trainer.load_and_prepare_data(include_sensitive=include_sensitive)
-    trainer.train_all()
-    
-    model = trainer.models.get(model_name)
-    if model is None:
-        raise HTTPException(status_code=404, detail=f"Model '{model_name}' not found")
-    
+def _execute_audit(model, model_name: str, trainer: ModelTrainer) -> Dict[str, Any]:
+    """Shared core logic to execute an audit given a loaded model and prepared trainer."""
     detector = BiasDetector()
-    y_pred, y_prob = trainer.get_predictions(model_name=model_name)
-    
-    audit = detector.audit_model(
+    return detector.audit_model(
         model=model,
         model_name=model_name,
         X_train=trainer.X_train,
@@ -36,8 +26,19 @@ def _run_audit(model_name: str, include_sensitive: bool = True) -> Dict[str, Any
         sensitive_features=trainer.sensitive_test,
         feature_names=trainer.feature_names,
     )
+
+def _run_audit(model_name: str, include_sensitive: bool = True) -> Dict[str, Any]:
+    """Helper to load a model and run a single model audit."""
+    trainer = ModelTrainer()
+    trainer.load_and_prepare_data(include_sensitive=include_sensitive)
     
-    return audit
+    # Try to load model from disk instead of training
+    try:
+        model = trainer.load_model(model_name)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Model '{model_name}' not found. Please train models first.")
+        
+    return _execute_audit(model, model_name, trainer)
 
 
 @router.get("/health")
@@ -66,6 +67,8 @@ def run_audit(request: AuditRequest):
             'recommendations': audit['recommendations'],
             'feature_importance': audit['explainability']['feature_importance'],
         })
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -77,27 +80,22 @@ def compare_models(request: CompareRequest):
         detector = BiasDetector()
         trainer = ModelTrainer()
         trainer.load_and_prepare_data(include_sensitive=request.include_sensitive_features)
-        trainer.train_all()
         
         results = {}
         for model_name in request.model_names:
-            model = trainer.models.get(model_name)
-            if model is None:
-                continue
+            try:
+                model = trainer.load_model(model_name)
+            except FileNotFoundError:
+                raise HTTPException(status_code=400, detail=f"Model '{model_name}' not found. Cannot compare.")
             
-            audit = detector.audit_model(
-                model=model,
-                model_name=model_name,
-                X_train=trainer.X_train,
-                X_test=trainer.X_test,
-                y_true=trainer.y_test,
-                sensitive_features=trainer.sensitive_test,
-                feature_names=trainer.feature_names,
-            )
-            results[model_name] = audit
+            results[model_name] = _execute_audit(model, model_name, trainer)
+            # Store in detector so compare_models() can access it
+            detector.audit_results[model_name] = results[model_name]
         
         comparison = detector.compare_models()
         return sanitize_for_json(comparison)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -109,10 +107,13 @@ def generate_report(model_name: str):
         audit = _run_audit(model_name)
         
         generator = ReportGenerator()
-        output_path = os.path.join(
+        report_dir = os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-            'tests', 'test_results', f'{model_name}_audit_report.html'
+            'tests', 'test_results'
         )
+        os.makedirs(report_dir, exist_ok=True)
+        output_path = os.path.join(report_dir, f'{model_name}_audit_report.html')
+        
         generator.save_report(audit, output_path)
         
         return sanitize_for_json({
