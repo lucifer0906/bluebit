@@ -75,8 +75,20 @@ class TestCompareEndpoint:
         response = client.post("/api/compare", json=payload)
         assert response.status_code == 200
 
+    def test_compare_invalid_model_rejected(self, client):
+        payload = {
+            "model_names": ["logistic_regression", "evil_model"],
+            "include_sensitive_features": True
+        }
+        response = client.post("/api/compare", json=payload)
+        assert response.status_code == 400
+
 
 class TestReportEndpoint:
     def test_report_returns_html(self, client):
         response = client.post("/api/report/logistic_regression")
         assert response.status_code == 200
+
+    def test_report_invalid_model_rejected(self, client):
+        response = client.post("/api/report/evil_model")
+        assert response.status_code == 404
