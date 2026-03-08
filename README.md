@@ -314,9 +314,9 @@ python -m pytest tests/ --cov=core --cov-report=html
 
 | Name | Role |
 |------|------|
-| Akshay | Backend & ML |
-| Team Member 2 | Frontend & Visualization |
-| Team Member 3 | Testing & Documentation |
+| Akshay Manbhaw | Backend & ML |
+| Gaurav Tiple | ML & Visualization + Presentation |
+| Chetan Shelar | Testing & Documentation |
 
 ## 📄 License
 
