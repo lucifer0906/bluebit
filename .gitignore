@@ -26,10 +26,37 @@ build/
 .DS_Store
 Thumbs.db
 
-# Model files (large)
+# --- Machine Learning / Data Science ---
+
+# Model weights and artifacts
 models/*.pkl
 models/*.joblib
+models/*.pth
+models/*.pt
+models/*.h5
+models/*.bin
+models/*.onnx
+models/*.keras
+models/*.weights
+models/*.tflite
+models/*.pb
 !models/.gitkeep
+
+# Datasets (large files)
+data/*.csv
+data/*.jsonl
+data/*.parquet
+data/*.arrow
+data/*.hdf5
+data/*.npy
+data/*.npz
+data/processed/
+data/raw/
+!data/.gitkeep
+
+# Modal specific
+.modal/
+modal.log
 
 # Test results
 tests/test_results/*.html
