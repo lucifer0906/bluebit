@@ -105,6 +105,44 @@ Predictor -.->|Load| Models
 Predictor -.->|Use| Datasets
 ```
 
+## 🔄 Analysis Workflow
+
+The following sequence diagram shows how **AEGIS AI performs a bias audit on a hiring model**, from dataset upload to final report generation.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant Dataset
+    participant Model
+    participant BiasEngine
+    participant Explainability
+    participant Report
+
+    User->>Frontend: 1. Upload dataset & model
+    Frontend->>Backend: 2. POST /upload
+
+    Backend->>Backend: 3. Validate inputs
+    Backend->>Dataset: Load dataset
+    Backend->>Model: Load trained model
+
+    Backend->>Model: 4. Run predictions on dataset
+    Model-->>Backend: Predictions
+
+    Backend->>BiasEngine: 5. Compute fairness metrics
+    BiasEngine-->>Backend: Bias scores (DP, EO, DI)
+
+    Backend->>Explainability: 6. Generate SHAP/LIME explanations
+    Explainability-->>Backend: Feature importance
+
+    Backend->>Report: 7. Generate audit report
+    Report-->>Backend: HTML/PDF report
+
+    Backend-->>Frontend: 8. Return audit results
+    Frontend-->>User: 9. Display dashboard & download report
+```
+
 ## ✨ Key Features
 
 ### Mandatory Deliverables ✅
