@@ -6,6 +6,7 @@ Generates visual scorecards and audit reports.
 import os
 from typing import Dict, Any
 from datetime import datetime
+from html import escape as html_escape
 
 
 class ReportGenerator:
@@ -14,8 +15,8 @@ class ReportGenerator:
     def generate_scorecard_html(self, audit_result: Dict[str, Any]) -> str:
         """Generate an HTML visual scorecard from audit results."""
         
-        model_name = audit_result.get('model_name', 'Unknown Model')
-        model_type = audit_result.get('model_type', 'Unknown')
+        model_name = html_escape(str(audit_result.get('model_name', 'Unknown Model')))
+        model_type = html_escape(str(audit_result.get('model_type', 'Unknown')))
         verdict = audit_result.get('overall_verdict', {})
         fairness = audit_result.get('fairness', {})
         metrics = fairness.get('metrics', {})
@@ -28,20 +29,20 @@ class ReportGenerator:
             passed = result.get('passed', False)
             status_icon = "✅" if passed else "❌"
             status_class = "pass" if passed else "fail"
-            metric_name = result.get('metric', key)
+            metric_name = html_escape(str(result.get('metric', key)))
             
             detail = ""
             if 'selection_rates' in result:
-                detail = str(result['selection_rates'])
+                detail = html_escape(str(result['selection_rates']))
             elif 'true_positive_rates' in result:
-                detail = str(result['true_positive_rates'])
+                detail = html_escape(str(result['true_positive_rates']))
             elif 'brier_score' in result:
-                detail = f"Brier Score: {result['brier_score']}"
+                detail = f"Brier Score: {html_escape(str(result['brier_score']))}"
             elif 'score' in result:
-                detail = f"Score: {result['score']}/100"
+                detail = f"Score: {html_escape(str(result['score']))}/100"
             elif 'sensitive_features_used' in result:
                 used = result['sensitive_features_used']
-                detail = f"Sensitive features used: {used}" if used else "No sensitive features used"
+                detail = f"Sensitive features used: {html_escape(str(used))}" if used else "No sensitive features used"
             
             metric_rows += f"""
             <tr class="{status_class}">
@@ -59,11 +60,11 @@ class ReportGenerator:
             severity_class = severity.lower()
             rec_html += f"""
             <div class="recommendation {severity_class}">
-                <span class="severity-badge">{severity}</span>
-                <strong>{rec.get('category', '')}</strong>
-                <p><em>Finding:</em> {rec.get('finding', '')}</p>
-                <p><em>Recommendation:</em> {rec.get('recommendation', '')}</p>
-                <p><em>Impact:</em> {rec.get('impact', '')}</p>
+                <span class="severity-badge">{html_escape(severity)}</span>
+                <strong>{html_escape(str(rec.get('category', '')))}</strong>
+                <p><em>Finding:</em> {html_escape(str(rec.get('finding', '')))}</p>
+                <p><em>Recommendation:</em> {html_escape(str(rec.get('recommendation', '')))}</p>
+                <p><em>Impact:</em> {html_escape(str(rec.get('impact', '')))}</p>
             </div>
             """
         
