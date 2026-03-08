@@ -61,9 +61,28 @@ class AdversarialDebiaser(BaseEstimator, ClassifierMixin):
             unfavorable_label=0
         )
         
-        # Initialize and train
+        # Initialize and train with GPU and Multi-core CPU support
         tf.compat.v1.reset_default_graph()
-        self.sess = tf.compat.v1.Session()
+        
+        # Get all CPU cores
+        import os
+        cpu_cores = os.cpu_count() or 1
+        
+        config = tf.compat.v1.ConfigProto(
+            intra_op_parallelism_threads=cpu_cores,
+            inter_op_parallelism_threads=cpu_cores,
+            allow_soft_placement=True
+        )
+        config.gpu_options.allow_growth = True
+        self.sess = tf.compat.v1.Session(config=config)
+        
+        # Check for GPU
+        gpus = tf.config.list_physical_devices('GPU')
+        if gpus:
+            print(f"🚀 GPU detected: {gpus[0].name}")
+            print(f"🧵 Multi-core CPU optimized with {cpu_cores} threads.")
+        else:
+            print(f"⚠️ No GPU detected, using {cpu_cores} CPU threads.")
         
         self.debiaser = AdversarialDebiasing(
             privileged_groups=self.privileged_groups,

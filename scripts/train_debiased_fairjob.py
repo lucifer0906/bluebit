@@ -12,22 +12,24 @@ import tensorflow as tf
 tf.compat.v1.disable_eager_execution()
 
 def train_and_audit():
-    print("Loading FairJob dataset from Hugging Face...")
-    # Load a representative subset for speed
-    df = pd.read_csv("hf://datasets/criteo/FairJob/fairjob.csv.gz", nrows=10000)
+    print("Loading local recruitment dataset from dataset folder...")
+    # Load the local dataset
+    dataset_path = os.path.join("dataset", "data.csv")
+    df = pd.read_csv(dataset_path)
     
-    # Handle missing values (AIF360 is strict about NAs)
-    initial_len = len(df)
+    # Handle missing values
     df = df.dropna()
-    if len(df) < initial_len:
-        print(f"Dropped {initial_len - len(df)} rows with missing values.")
-    target = 'click'
-    sensitive_col = 'protected_attribute'
     
-    # Preprocessing: AIF360 needs the sensitive attribute to be a column in the training data
-    # We'll keep the sensitive attribute as a feature for the debiaser to use
-    cols_to_drop = [target, 'user_id', 'impression_id', 'product_id']
-    X_df = df.drop(columns=cols_to_drop)
+    # Column Mappings for the local dataset
+    target = 'HiringDecision'
+    sensitive_col = 'Gender'
+    
+    # Preprocessing
+    # Ensure Gender is numeric if it's not (e.g. 'Male'/'Female')
+    if df[sensitive_col].dtype == object:
+        df[sensitive_col] = df[sensitive_col].map({'Male': 1, 'Female': 0})
+    
+    X_df = df.drop(columns=[target])
     y = df[target]
     
     feature_names = X_df.columns.tolist()
