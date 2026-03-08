@@ -171,3 +171,15 @@ if 'explainability' in st.session_state:
                 pct = f['percentage']
                 color = "🔴" if pct > 10 else "🟡" if pct > 5 else "🟢"
                 st.write(f"{color} **{f['feature']}**: {pct:.1f}%")
+
+st.divider()
+st.info("✅ **Next Step:** Go to **📄 Report** in the sidebar to generate and download the full audit report.")
+
+# Sidebar status
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### 📋 Progress")
+    st.markdown("✅ Upload & Train")
+    st.markdown("✅ Bias Audit")
+    st.markdown("✅ Explainability" if 'explainability' in st.session_state else "🔄 Explainability")
+    st.markdown("⬜ Report")

@@ -72,7 +72,42 @@ with col3:
 
 st.divider()
 
-st.markdown("### 🚀 Getting Started")
+st.markdown("### 🚀 Quick Demo")
+st.write("Click below to instantly run a full bias audit on our pre-trained Random Forest model:")
+
+if st.button("⚡ Run Quick Demo Audit", type="primary"):
+    with st.spinner("Running bias audit on Random Forest..."):
+        from frontend.cache import get_cached_trainer, get_cached_model
+        from core.bias_detector import BiasDetector
+
+        trainer = get_cached_trainer(include_sensitive=True)
+        model = get_cached_model("random_forest", include_sensitive=True)
+        detector = BiasDetector()
+        audit = detector.audit_model(
+            model=model, model_name="random_forest",
+            X_train=trainer.X_train, X_test=trainer.X_test,
+            y_true=trainer.y_test, sensitive_features=trainer.sensitive_test,
+            feature_names=trainer.feature_names,
+        )
+        verdict = audit['overall_verdict']
+        st.session_state['quick_demo_audit'] = audit
+
+    col_a, col_b, col_c, col_d = st.columns(4)
+    col_a.metric("Fairness Score", f"{verdict['score']}%")
+    col_b.metric("Grade", verdict['grade'])
+    col_c.metric("Tests Passed", f"{verdict['tests_passed']}/{verdict['total_tests']}")
+    col_d.metric("Accuracy", f"{audit['performance']['accuracy']:.4f}")
+
+    if verdict['passed']:
+        st.success(f"✅ Model PASSES fairness audit — {verdict['label']}")
+    else:
+        st.error(f"❌ Model FAILS fairness audit — {verdict['label']}")
+
+    st.info("👈 Navigate to **Audit**, **Explainability**, or **Report** pages in the sidebar for deeper analysis.")
+
+st.divider()
+
+st.markdown("### 📖 How to Use")
 st.write("Use the sidebar to navigate between pages:")
 st.markdown("""
 1. **📤 Upload & Train** — Generate synthetic data and train ML models

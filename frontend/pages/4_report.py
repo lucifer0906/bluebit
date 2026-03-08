@@ -113,3 +113,15 @@ if 'report' in st.session_state:
             )
         
         st.info("💡 The HTML report includes the full scorecard with metrics, visualizations, and recommendations — ready for hackathon submission.")
+
+st.divider()
+st.success("🎉 **All steps complete!** You've audited your model, explored explanations, and generated a downloadable report.")
+
+# Sidebar status
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### 📋 Progress")
+    st.markdown("✅ Upload & Train")
+    st.markdown("✅ Bias Audit")
+    st.markdown("✅ Explainability")
+    st.markdown("✅ Report" if 'report' in st.session_state else "🔄 Report")

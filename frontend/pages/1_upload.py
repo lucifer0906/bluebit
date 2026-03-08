@@ -111,3 +111,15 @@ if st.button("🚀 Train Models", type="primary"):
             y_pred, y_prob = trainer.get_predictions(model_name=model_name)
             accuracy = (y_pred == trainer.y_test).mean()
             st.write(f"**{model_name}**: Accuracy = {accuracy:.4f}")
+
+st.divider()
+st.info("✅ **Next Step:** Go to **🔍 Audit** in the sidebar to run a bias audit on your trained models.")
+
+# Sidebar status
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### 📋 Progress")
+    st.markdown("✅ Upload & Train" if 'trained_models' in st.session_state else "⬜ Upload & Train")
+    st.markdown("⬜ Bias Audit")
+    st.markdown("⬜ Explainability")
+    st.markdown("⬜ Report")
