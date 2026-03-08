@@ -163,6 +163,37 @@ sequenceDiagram
 - HTML audit report generation with visual scorecards
 - Real recruitment dataset support (`dataset/data.csv`)
 
+## 🧠 Bias Detection ML Pipeline
+
+The AEGIS AI auditing engine evaluates machine learning hiring models through a structured bias detection pipeline.  
+The system generates predictions, computes fairness metrics across protected groups, explains model behavior, and produces an interpretable audit report.
+
+```mermaid
+flowchart LR
+
+classDef stage fill:#2b2b2b,stroke:#ffffff,stroke-width:2px,color:#ffffff
+classDef data fill:#2b2b2b,stroke:#ffffff,stroke-width:2px,color:#ffffff
+
+Dataset[(Hiring Dataset<br/>Gender / Race / Features)]:::data
+Model[(Trained ML Model<br/>LogReg / RandomForest / XGBoost)]:::data
+
+Prediction[Prediction Engine<br/>Generate Hiring Decisions]:::stage
+Fairness[Fairness Metrics Engine<br/>Demographic Parity<br/>Equal Opportunity<br/>Disparate Impact<br/>Calibration]:::stage
+Explain[Explainability Engine<br/>SHAP / LIME Feature Importance]:::stage
+Debias[Bias Mitigation<br/>AIF360 Adversarial Debiasing]:::stage
+Report[Audit Report Generator<br/>Scorecards + Recommendations]:::stage
+
+Dataset --> Prediction
+Model --> Prediction
+
+Prediction --> Fairness
+Prediction --> Explain
+
+Fairness --> Debias
+Explain --> Report
+Debias --> Report
+```
+
 ## 🛠️ Tech Stack
 
 | Component | Technology |
