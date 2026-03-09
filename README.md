@@ -339,7 +339,7 @@ python -m pytest tests/ --cov=core --cov-report=html
 
 ## 📹 Demo Video
 
-[Link to Demo Video](#) _(Will be updated before submission)_
+[Link to Demo Video](https://drive.google.com/file/d/16yVeFs8Fw2Tguo1vFO34SvmiivSgIuZk/view?usp=sharing)
 
 ## 👥 Team — MISAL PAV
 
